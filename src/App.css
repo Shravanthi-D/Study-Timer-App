@@ -13,6 +13,8 @@ body, html, #root {
 
 /* Center all screens */
 .start-screen,
+.choose-screen,
+.pomodoro-screen,
 .set-screen,
 .running-screen,
 .paused-screen,

@@ -11,16 +11,20 @@ studyMusic.loop=true;
 
 function App(){
     const [mode,setMode]=useState("focus");
-    const[durations]=useState({
+    const[durations,setDurations]=useState({
       focus:1*60,
       break:5*10,
     });
+    const[timerType,setTimerType]=useState("regular");
     const [timeLeft, setTimeLeft]=useState(durations.focus);
     const [isRunning,setIsRunning]=useState(false);
     const[count,setCount]=useState(0);
     const[screen,setScreen]=useState("start");
     const[digits,setDigits]=useState(["","","","","",""]);
-    
+    const[focusMinutes,setFocusMinutes]=useState([""]);
+    const[breakMinutes,setBreakMinutes]=useState([""]);
+    const[sessions,setSessions]=useState(1);
+
     const digitRefs=useRef([]);
 
     function handleDigitChange(index,value){
@@ -40,7 +44,7 @@ function App(){
       setDigits(updated);
       
       //autojump to next box
-      if(index<5){
+      if(timerType==="regular" && index<5){
         digitRefs.current[index+1].focus();
       }
     }
@@ -61,6 +65,8 @@ function App(){
 
       if(total==0)return; //dont start if empty
 
+      studyMusic.pause();
+      studyMusic.currentTime=0;
       studyMusic.play();
       setTimeLeft(total);
       setScreen("running");
@@ -91,7 +97,31 @@ function App(){
   }, [isRunning]);
 
   useEffect(()=>{
-    if(timeLeft==0 && isRunning){
+    if(timerType==="pomodoro" && timeLeft==0 && mode==="focus"){
+      //switch to break mode
+      finishedSound.play();
+      setSessions(sessions-1);
+      setMode("break")
+      setTimeLeft(durations.break);
+    }
+    else if(timerType==="pomodoro" && mode==="break" && timeLeft==0){
+      if(sessions==0){
+        finishedSound.play();
+        studyMusic.pause();
+        studyMusic.currentTime=0;
+        finishedSound.play();
+        setIsRunning(false);
+        setScreen("done");
+      }
+      else{
+        finishedSound.play();
+        setMode("focus");
+        setTimeLeft(durations.focus);
+      }
+      
+    }
+
+    else if(timeLeft==0 && isRunning){
       studyMusic.pause();
       studyMusic.currentTime=0;
       finishedSound.play();
@@ -117,7 +147,7 @@ function App(){
         >
         <motion.button whileTap={{scale:0.95}} whileHover={{scale:1.25}} onClick={()=> {
           startSound.play();
-          setScreen("set");
+          setScreen("choose");
           setIsRunning(false);
           setTimeLeft(0);
           setDigits(["","","","","",""]);
@@ -126,9 +156,91 @@ function App(){
       </div>
     )}
     
-       
-   
-    {screen==="set" &&(
+    {screen==="choose" &&(
+      <div className="choose-screen">
+        <motion.div className="card"
+          key="choose"
+          intial={{opacity:0,y:20}}
+          animate={{opacity:1,y:0}}
+          exit={{opacity:0,y:-20}}
+          transition={{duration:0.70}}
+          >
+            <motion.button whileTap={{scale:0.95}} whileHover={{scale:1.1}} onClick={()=>{
+              buttonSound.play();
+              setTimerType("pomodoro");
+              setScreen("pomodoro");
+            }}>Pomodoro</motion.button>
+            <motion.button whileTap={{scale:0.95}} whileHover={{scale:1.1}} onClick={()=>{
+              buttonSound.play();
+              setTimerType("regular");
+              setScreen("regular");
+            }}>Regular</motion.button>
+          </motion.div>
+      </div>
+    )}
+
+    {screen==="pomodoro" &&(
+      <div className="pomodoro-screen">
+        <motion.div className="card"
+          key="pomodoro"
+          initial={{opacity:0,y:20}}
+          animate={{opacity:1,y:0}}
+          exit={{opacity:0,y:-20}}
+          transition={{duration:0.70}}>
+            <h2>Set Pomodoro Timer</h2>
+            
+            <div className="digit-container">
+              <h3>Focus Time</h3>
+              <input
+              type="number"
+              placeholder="Focus Minutes"
+              value={focusMinutes}
+              onChange={(e)=> setFocusMinutes(e.target.value)}
+              />
+              <h3>Break Time</h3>
+              <input
+                type="number"
+                placeholder="Break mintues"
+                value={breakMinutes}
+                onChange={(e)=>setBreakMinutes(e.target.value)}
+              />
+              <h3>Number of Sessions</h3>
+              <input
+                type="number"
+                placeholder="1"
+                value={sessions}
+                onChange={(e)=>setSessions(e.target.value)}
+                />
+            </div>
+
+            <motion.button whileTap={{scale:0.95}} whileHover={{scale:1.25}} onClick={()=>{
+              
+              buttonSound.play();
+              const focusSeconds=Number(focusMinutes)*60;
+              const breakSeconds=Number(breakMinutes)*60;
+
+              setDurations({
+                focus:focusSeconds,
+                break:breakSeconds,
+              });
+
+              studyMusic.pause();
+              studyMusic.currentTime=0;
+              studyMusic.play();
+              
+              setMode("focus");
+              setTimeLeft(focusSeconds);
+              setIsRunning(true);
+              setScreen("running");
+
+            }}>Start</motion.button>
+
+          </motion.div>
+      </div>
+    )
+
+    }
+    {screen==="regular" &&(
       <div className="set-screen">
         <motion.div className="card"
           key="set"
@@ -169,7 +281,7 @@ function App(){
           exit={{opacity:0,y:-20}}
           transition={{duration:0.5}}
         >
-        <h2>Study</h2>
+       <h2>{mode==="focus" ? "Study!" : "Break" }</h2>
         <p className="timer" >
         <div className="box">{formatTime(timeLeft)}</div>
         </p>
@@ -205,7 +317,7 @@ function App(){
           exit={{opacity:0,y:0}}
           transition={{duration:0.7}}
           >
-         <h2>Study</h2>
+         <h2>Paused</h2>
         <p className="timer" >
         <div className="box">{formatTime(timeLeft)}</div>
         </p>
