@@ -1,5 +1,9 @@
 import {useState,useEffect} from "react";
-
+import Playbutton from "./assets/play_button.png";
+import Resumebutton from "./assets/resume_button.png";
+import nextbutton from "./assets/forward.png";
+import prevbutton from "./assets/reverse.png";
+import repeatbutton from "./assets/loop.png";
 export const globalAudio=new Audio();
 
 function MusicPlayer(){
@@ -11,6 +15,7 @@ function MusicPlayer(){
     ]);
     const[currentTrack,setCurrentTrack]=useState(0);
     const[start,setStart]=useState(0);
+    const[loop,setLoop]=useState(false);
 
     useEffect(()=>{
         globalAudio.src=playlist[currentTrack].src;
@@ -18,6 +23,10 @@ function MusicPlayer(){
             globalAudio.play();
         }
         setStart(start+1);
+
+        globalAudio.onended=()=>{
+            setCurrentTrack(prev=>(prev+1)%playlist.length);
+        };
 
     },[currentTrack]);
 
@@ -46,18 +55,24 @@ function MusicPlayer(){
     }
 
     function volumeControl(e){
-        audioRef.current.volume=e.target.value;
+        globalAudio.volume=e.target.value;
     }
 
+    function repeatSong(){
+        const newLoop=!loop;
+        setLoop(newLoop);
+        globalAudio.loop=newLoop;
+    }
     return (
         <div className="card">
         <div className="music-player">
             <h3>{playlist[currentTrack].name}</h3>
 
-            <button onClick={prevSong}>Prev</button>
-            <button onClick={playSong}>Play</button>
-            <button onClick={pauseSong}>Pause</button>
-            <button onClick={nextSong}>Next</button>
+            <button className="icon-btn" onClick={prevSong}><img src={prevbutton} alt="Prev"/></button>
+            <button className="icon-btn" onClick={playSong}><img src={Playbutton} alt="Play"/></button>
+            <button className="icon-btn" onClick={pauseSong}><img src={Resumebutton} alt="Pause"/></button>
+            <button className="icon-btn" onClick={nextSong}><img src={nextbutton} alt="Next"/></button>
+            <button className="icon-btn" onClick={repeatSong}><img src={repeatbutton} alt="Repeat"/></button>
             <h3>Volume</h3>
             <input
                 type="range"
