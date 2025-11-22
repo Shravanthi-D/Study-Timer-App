@@ -1,13 +1,14 @@
 import {useEffect,useState} from "react";
 import {useRef} from "react";
 import {motion, AnimatePresence} from "framer-motion";
+//import MusicPlayer from './MusicPlayer.jsx'
+import SidePanel from "./SidePanel.jsx"
+import { globalAudio} from "./MusicPlayer.jsx";
 
+const studyMusic=new Audio("/sounds/Study_music.mp3");
 const startSound= new Audio("/sounds/start.mp3");
 const buttonSound= new Audio("/sounds/button.mp3");
 const finishedSound= new Audio("/sounds/Finished.mp3");
-const studyMusic= new Audio("/sounds/Study_music.mp3");
-
-studyMusic.loop=true;
 
 function App(){
     const [mode,setMode]=useState("focus");
@@ -21,10 +22,13 @@ function App(){
     const[count,setCount]=useState(0);
     const[screen,setScreen]=useState("start");
     const[digits,setDigits]=useState(["","","","","",""]);
-    const[focusMinutes,setFocusMinutes]=useState([""]);
-    const[breakMinutes,setBreakMinutes]=useState([""]);
+    const[focusMinutes,setFocusMinutes]=useState("");
+    const[breakMinutes,setBreakMinutes]=useState("");
     const[sessions,setSessions]=useState(1);
 
+    const[showPlayer,setShowplayer]=useState(false);
+
+    
     const digitRefs=useRef([]);
 
     function handleDigitChange(index,value){
@@ -65,9 +69,9 @@ function App(){
 
       if(total==0)return; //dont start if empty
 
-      studyMusic.pause();
-      studyMusic.currentTime=0;
-      studyMusic.play();
+      globalAudio.pause();
+      globalAudio.currentTime=0;
+      globalAudio.play();
       setTimeLeft(total);
       setScreen("running");
       setIsRunning(true);
@@ -107,8 +111,8 @@ function App(){
     else if(timerType==="pomodoro" && mode==="break" && timeLeft==0){
       if(sessions==0){
         finishedSound.play();
-        studyMusic.pause();
-        studyMusic.currentTime=0;
+        globalAudio.pause();
+        globalAudio.currentTime=0;
         finishedSound.play();
         setIsRunning(false);
         setScreen("done");
@@ -122,8 +126,8 @@ function App(){
     }
 
     else if(timeLeft==0 && isRunning){
-      studyMusic.pause();
-      studyMusic.currentTime=0;
+      globalAudio.pause();
+      globalAudio.currentTime=0;
       finishedSound.play();
       setIsRunning(false);
       setScreen("done");
@@ -133,7 +137,9 @@ function App(){
 
   return (
   <div>
+    <SidePanel/>
     <AnimatePresence mode="wait">
+        
     {screen==="start" && (
       <div className="start-screen">
       
@@ -209,7 +215,7 @@ function App(){
                   return;
                 }
                 else{
-                  setFocusMinutes(Number(value));
+                  setFocusMinutes(value);
                 }
               }}
 
@@ -231,7 +237,7 @@ function App(){
                     return;
                   }
                   else{
-                    setBreakMinutes(Number(value));
+                    setBreakMinutes(value);
                   }
                 }}
 
@@ -256,9 +262,9 @@ function App(){
                 break:breakSeconds,
               });
 
-              studyMusic.pause();
-              studyMusic.currentTime=0;
-              studyMusic.play();
+              globalAudio.pause();
+              globalAudio.currentTime=0;
+              globalAudio.play();
               
               setMode("focus");
               setTimeLeft(focusSeconds);
@@ -307,6 +313,8 @@ function App(){
 
     {screen==="running" &&(
       <div className="running-screen">
+        
+
         <motion.div className="card"
           initial={{opacity:0,y:20}}
           animate={{opacity:1,y:0}}
@@ -320,7 +328,7 @@ function App(){
 
         <motion.button whileTap={{scale:0.95}} whileHover={{scale:1.05}} onClick={()=>{
           buttonSound.play();
-          studyMusic.pause();
+          globalAudio.pause();
           setIsRunning(false);
           setScreen("paused");
         }
@@ -330,8 +338,8 @@ function App(){
 
         <motion.button whileTap={{scale:0.95}} whileHover={{scale:1.05}} onClick={()=>{
           buttonSound.play();
-          studyMusic.pause();
-          studyMusic.currentTime=0;
+          globalAudio.pause();
+          globalAudio.currentTime=0;
           setIsRunning(false);
           setScreen("done");
         }}>Stop</motion.button>
@@ -356,7 +364,7 @@ function App(){
 
         <motion.button whileTap={{scale:0.95}} whileHover={{scale:1.05}} onClick={()=>{
           buttonSound.play();
-          studyMusic.play();
+          globalAudio.play();
           setIsRunning(true);
           setScreen("running");
         }

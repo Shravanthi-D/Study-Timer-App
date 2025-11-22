@@ -30,7 +30,7 @@ body, html, #root {
 .card {
   background: #E0DDE7;
   border-radius: 16px;
-  padding: 24px 32px;
+  padding: 14px 12px;
   box-shadow: 0 0 8px rgba(0,0,0,0.1);
   text-align: center;
   min-width: 260px;
@@ -68,6 +68,43 @@ body, html, #root {
   border-radius: 10px;
   background-color: #f7e8ef;
 }
+
+.menu-button {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  z-index: 1000;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar {
+  position: fixed;
+  right: -400px; /* hidden off-screen */
+  top: 0;
+  width: 300px;
+  height: 100vh;
+  background: #f7e8ef;
+  box-shadow: -4px 0 12px rgba(0,0,0,0.1);
+  transition: right 0.3s ease;
+  z-index: 999;
+  padding: 20px;
+}
+
+.sidebar.open {
+  right: 0; /* slide in */
+}
+
+.close-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+
 
 button {
   padding: 8px 16px;
