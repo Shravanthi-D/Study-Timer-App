@@ -193,16 +193,48 @@ function App(){
               <h3>Focus Time</h3>
               <input
               type="number"
+              min="1"
               placeholder="Focus Minutes"
               value={focusMinutes}
-              onChange={(e)=> setFocusMinutes(e.target.value)}
+              onChange={(e)=> {
+                //to prevent negative numbers
+                const value=e.target.value;
+
+                if(value===""){
+                  setFocusMinutes("");
+                  return;
+                }
+
+                if(Number(value)<0){
+                  return;
+                }
+                else{
+                  setFocusMinutes(Number(value));
+                }
+              }}
+
               />
               <h3>Break Time</h3>
               <input
                 type="number"
+                min="1"
                 placeholder="Break mintues"
                 value={breakMinutes}
-                onChange={(e)=>setBreakMinutes(e.target.value)}
+                onChange={(e)=>{
+                  const value=e.target.value;
+                  if(value===""){
+                    setBreakMinutes("");
+                    return;
+                  }
+                  
+                  if(Number(value)<0){
+                    return;
+                  }
+                  else{
+                    setBreakMinutes(Number(value));
+                  }
+                }}
+
               />
               <h3>Number of Sessions</h3>
               <input
